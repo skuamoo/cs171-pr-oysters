@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <script src = "js/oystervis.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+
+        <div class="row">
+            <div class="col-md-9" id="oysterVis">
+                Show: &nbsp;
+                <label><input type="radio" class="species" name="species" value="oysters" checked>Oysters</label>
+                <label><input type="radio" class="species" name="species" value="crabs">Crabs</label><br>
+            </div>
+        </div>
+
+    <script>
+        $(function(){ 
+
+            var waterQualityData = [];
+            var stationInfoData = [];
+            var landingsData = [];
+            var revenueData = [];
+            var gdpData = [];
+
+            var initVis = function(){
+
+                var MyEventHandler = new Object();
+                var oyster_vis = new OysterVis(d3.select("#oysterVis"), landingsData, MyEventHandler);
+
+                $(MyEventHandler).bind("selectionChanged", function(event, species){
+                    console.log("hi");
+                    count_vis.onSelectionChange(species);
+                });       
+            }  
+
+            var dataLoaded = function (error, _waterQuality, _stationInfo, _landings, _seafoodRevenues, _gdpMD) {
+
+                if (!error) {
+
+                    landingsData = _landings.map(function(d) {
+                        var res = {
+                            species: d.species,
+                            year: parseInt(d.year),
+                            md_pounds: parseInt(d.md_pounds),
+                            md_value: parseInt(d.md_value),
+                            va_pounds: parseInt(d.va_pounds),
+                            va_value: parseInt(d.va_value),
+                            total_pounds: parseInt(d.md_pounds) + parseInt(d.va_pounds),
+                            total_value: parseInt(d.md_value) + parseInt(d.va_value)
+
+                        }
+
+                        return res;
+
+                    });
+                    initVis();  
+                }
+            }
+
+            var startHere = function(){
+
+                queue()
+                    .defer(d3.csv, 'data/waterQuality2014.csv')
+                    .defer(d3.csv, 'data/StationInfoRefined.csv')
+                    .defer(d3.csv, 'data/Landings.csv')
+                    .defer(d3.csv, 'data/SeafoodRevenues.csv')
+                    .defer(d3.csv, 'data/md_gdp_1957_2010.csv')
+                    .await(function(error, waterQuality, stationInfo, landings, seafoodRevenues, gdpMD) { 
+                        dataLoaded(error, waterQuality, stationInfo, landings, seafoodRevenues, gdpMD);
+                    });
+            }
+
+            startHere();
+            d3.selectAll("input.species")
+                .on("change", function(){
+                    var species = d3.select(this).property("value");
+                    console.log(species);
+                    $(this.MyEventHandler).trigger("selectionChanged", species);
+                });
+       })
+
+    </script>
+</body>
+</html>

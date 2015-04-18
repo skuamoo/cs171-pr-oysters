@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+
+</head>
+<body>
+
+    <script>
+    var margin = {top:20, right:20, bottom:30, left:80};
+    var width = 600 - margin.left - margin.right;
+    var height = 1000 - margin.top - margin.bottom;
+    var padding = 10;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + this.margin.top + margin.bottom);
+
+    var projection = d3.geo.mercator().scale(15000)
+        .center([-75.5,39]);
+//    .translate([width/2, height/2]);
+//    .translate([75, -39])
+//    .scale(5000);
+//    .scale(5000);
+//    .translate([width / 2, height / 2]);
+//var projection = d3.geo.albers();
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+
+        d3.json("data/shapefile/chesapeaketopo4.json", function(chesapeake) {
+            console.log(chesapeake);
+//            var topo = topojson.feature(chesapeake, chesapeake.objects.a809b5235997a39c6ed13cfda033fadbb);
+            var topo = topojson.feature(chesapeake, chesapeake.objects.shore_dd);
+            console.log(topo.features);
+//        svg.append("path")
+//            .datum(topo.features)
+//            .attr("d", path);
+            svg.selectAll("path")
+                .data(topo.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .style("fill", "lightblue");
+
+            var aa = [38.41457, -76.34565];
+ //           var bb = [37.41153, -76.15966];
+        });
+        
+    d3.csv("data/StationInfoRefined.csv", function(error, data){
+            projection.scale(1);
+            data = data.map(function(d) {
+                var station = d.Station;
+                var description = d.Station_Description;
+                var fips = d.FIPS;
+                var county = d.County_City;
+                var lat = d.Latitude;
+                var lon = d.Longitude;
+
+                return {
+                    "station": station,
+                    "description": description,
+                    "fips": fips,
+                    "county": county,
+                    "lat": lat,
+                    "lon": lon
+                }
+            });
+
+        var yScale = d3.scale.linear()
+            .domain([d3.min(data, function(d) { return d.lat; }), d3.max(data, function(d) { return d.lat; })])
+                .range([935, 65]);
+        var xScale = d3.scale.linear()
+            .domain([d3.max(data, function(d) { return d.lon; }), d3.min(data, function(d) { return d.lon; })])
+            .range([228, 358]);
+
+        var node = svg.selectAll(".station")
+            .data(data)
+            .enter()
+            .append("g").attr("class", "station");
+        
+        node.append("circle")
+            .attr("r", 5)
+            .append("svg:title")
+                .text(function(d) { return "lat:" + d.lat + "," + xScale(d.lat) + " lon:" + d.lon + "," + xScale(d.lon);});
+        
+        node.append("text")
+            .text(function(d) {return d.station;})
+            .attr("x", function() {return 8;})
+            .attr("y", function() {return 3;});
+
+        node.transition().duration(500)
+            .attr("transform", function(d) { 
+                return "translate("+xScale(d.lon)+","+yScale(d.lat)+")"; 
+            });
+    });
+
+    </script>
+</body>
+</html>

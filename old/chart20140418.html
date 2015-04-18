@@ -212,61 +212,10 @@ body {
 
             function drawWater() {
                 var measure = "TN";
-                var layer = "B ";
+                var layer = "B";
                 var station = "CB3.1";
 
-                var water = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == layer && d.parameter == measure;});
-console.log(water[0]);
-                var margin2 = {top:20, right:20, bottom:30, left:80};
-                var width2 = 450 - margin2.left - margin2.right;
-                var height2 = 250 - margin2.top - margin2.bottom;
-                var padding2 = 10;
-
-                var xScale2 = d3.scale.linear().range([0, width2])
-                    .domain([1, 12]);
-                var yScale2 = d3.scale.linear()
-                    .range([height2, 10])
-                    .domain([0, d3.max(water, function(d) { return d.mvalue; })]);
-
-                var svg2 = d3.select("#waterVis").append("svg")
-                    .attr("width", width2 + margin2.left + margin2.right)
-                    .attr("height", height2 + margin2.top + margin2.bottom)
-                .append("g")
-                    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-
-                svg2.append("text").text("Nitrogen for station " + station).attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
-
-                var point = svg2.selectAll(".point")
-                    .data(water)
-                    .enter()
-                    .append("g").attr("class", "point");
-           
-                var xAxis2 = d3.svg.axis()
-                    .scale(xScale2)
-                    .orient("bottom")
-                    .tickFormat(d3.format("d"));
-
-                var yAxis2 = d3.svg.axis()
-                    .scale(yScale2)
-                    .orient("left");  
-
-                point.append("circle")
-                    .style("fill", "blue")
-                    .style("opacity", .8)
-                    .attr("cx", function(d){return xScale2(d.month);})
-                    .attr("cy", function(d) {return yScale2(d.mvalue);})
-                    .attr("r", 4);
-         
-                svg2.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + height2 + ")")
-                    .call(xAxis2);
-
-                svg2.append("g")
-                    .attr("class", "y axis")
-                    .attr("id", "yaxis")
-                    .call(yAxis2);
-
+                var water = waterQualityData.filter(function(d) { return d.species == "Oyster" && d.state == "Maryland";});
 /*
                 var water = d3.nest()
                     .key(function(d) {return d.month;})

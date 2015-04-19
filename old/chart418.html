@@ -7,8 +7,8 @@
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
-    <script src="libs/queue/queue.v1.min.js"></script>
-    <script src="libs/topojson/topojson.v1.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
 
 <style>
 body { 
@@ -40,12 +40,6 @@ body {
 
     float:left;
 }
-.line {
-  fill: none;
-  stroke: blue;
-  stroke-width: 1.5px;
-}
-
 </style>
 
 </head>
@@ -87,7 +81,7 @@ body {
             function drawCoast() {
 
                 var margin = {top:20, right:20, bottom:30, left:80};
-                var width = 310 - margin.left - margin.right;
+                var width = 600 - margin.left - margin.right;
                 var height = 700 - margin.top - margin.bottom;
                 var padding = 10;
 
@@ -96,7 +90,7 @@ body {
                     .attr("height", height + margin.top + margin.bottom);
 
                 var projection = d3.geo.mercator().scale(10000)//scale(15000)
-                    .center([-74.6,38.5]);//.center([-75.5,39]);
+                    .center([-76.3,38.5]);//.center([-75.5,39]);
 
                 var path = d3.geo.path()
                     .projection(projection);
@@ -119,45 +113,31 @@ body {
 
                 var xScale = d3.scale.linear()
                     .domain([d3.max(stationInfoData, function(d) { return d.lon; }), d3.min(stationInfoData, function(d) { return d.lon; })])
-                    .range([145, 245]);
+                    .range([440, 540]);
 
                 var node = svg.selectAll(".station")
                     .data(stationInfoData)
                     .enter()
                     .append("g").attr("class", "station");
         
-                var circle = node.append("circle")
+                node.append("circle")
                     .attr("r", 5)
                     .style("cursor", "pointer")
-                    .style("stroke", "white")
-//                    .style("fill", "black")
-                    .style("opacity", 0.8)
+                    .on("mouseover", function() {
+                            d3.select(this).attr("fill", "red");})
+                    .on("mouseout", function() {
+                            d3.select(this).attr("fill", "black");})
+                    .on("click", function(d) { return alert("clicking here will display graph for " + d.station);})
                     .append("svg:title")
                         .text(function(d) { return "lat:" + d.lat + ", lon:" + d.lon;});
         
-                var stationid = node.append("text")
+                node.append("text")
                     .text(function(d) {return d.station;})
                     .attr("x", function() {return 8;})
                     .attr("y", function() {return 3;})
                     .attr("transform", function() {
-                        return "rotate(-15)" 
-                    })
-                    .style("opacity", 0);
-
-                node
-                    .on("mouseover", function(d) {
-                            d3.select(this).attr("fill", "red");
-                            stationid.style("opacity", function(k) {if (k.station == d.station) {return 1;} else { return 0;}});
-                        })
-                    .on("mouseout", function() {
-                        stationid.style("opacity", 0);
-                        d3.select(this).attr("fill", "black");
-                    })
-                    .on("click", function(d) { 
-                        alert("clicking here will display graph for " + d.station);
- //                       stationid.style("opacity", 0);
- //                       stationid.style("opacity", function(k) {if (k.station == d.station) {return 1;} else { return 0;}});
-                    })
+                        return "rotate(-35)" 
+                    });
 
                 node.transition().duration(500)
                     .attr("transform", function(d) { 
@@ -187,16 +167,12 @@ body {
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 svg.append("text").text("Oyster Landings by Year").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
-/*
+
                 var point = svg.selectAll(".point")
                     .data(oystermd)
                     .enter()
-                    .append("g").attr("class", "point");     */
-
-                var line = d3.svg.line()
-                    .x(function(d) { return xScale(d.year); })
-                    .y(function(d) { return yScale(d.pounds); });
-        
+                    .append("g").attr("class", "point");
+           
                 var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
@@ -206,17 +182,17 @@ body {
                     .scale(yScale)
                     .orient("left");  
 
-/*                var sizescale = d3.scale.linear().range([2,20])
+                var sizescale = d3.scale.linear().range([2,20])
                     .domain([d3.min(oystermd, function(d) {return d.value;}), d3.max(oystermd, function(d) {return d.value;})]);
 
                 point.append("circle")
-                    .style("fill", function(d) { if (d.species == "Oyster") {return "blue";} else {return "red";}})
+                    .style("fill", function(d) { if (d.state == "Maryland") {return "blue";} else {return "red";}})
                     .style("opacity", .8)
                     .attr("cx", function(d){return xScale(d.year);})
                     .attr("cy", function(d) {return yScale(d.pounds);})
                     .attr("r", 4)//function(d) {return sizescale(d.value);})
                     .append("svg:title")
-                        .text(function(d){ return "year " + d.year + " pounds " + d.pounds + " value " + d.value + " state " + d.state + " species " + d.species;});   */
+                        .text(function(d){ return "year " + d.year + " pounds " + d.pounds + " value " + d.value + " state " + d.state + " species " + d.species;});
          
                 svg.append("g")
                     .attr("class", "x axis")
@@ -227,11 +203,6 @@ body {
                     .attr("class", "y axis")
                     .attr("id", "yaxis")
                     .call(yAxis);
-
-                svg.append("path")
-                    .datum(oystermd)
-                    .attr("class", "line")
-                    .attr("d", line);
 
                 svg.append("line")
                     .attr("x1", xScale(selectedYear))  

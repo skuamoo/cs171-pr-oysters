@@ -192,6 +192,7 @@ body {
                     })
                     .on("click", function(d) { 
                         drawWater(d.station);
+
                         node
                             .classed("clickedStation", function(k) {if (k.station == d.station) {return true;}});
                         stationid
@@ -282,7 +283,9 @@ body {
                     .attr("class","water")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text(measure + " by Station").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").text(measure + " by Station").attr("x", 110).attr("y", 0).style("font", "12px sans-serif");
+
+                svg.append("text").text("Click multiple stations to compare").attr("x", 100).attr("y", 100).attr("id", "stationClick");
 /*                var options = svg.append("g")
                     .attr("x", 100)
                     .attr("y", 0);
@@ -326,7 +329,7 @@ body {
             }
 
             function drawWater(station) {
-
+                d3.select("#stationClick").style("opacity", 0);
                 stationCount += 1;
 
                 var water = waterQualityData.filter(function(d) { return d.station == station && d.parameter == measure;});
@@ -379,6 +382,7 @@ body {
             function clearWater() {
                 d3.select("#waterVis").select("svg").remove();
                 drawWaterSetup();
+                d3.select("#stationClick").style("opacity", 1);
             }
 
             function drawMonthWater() {

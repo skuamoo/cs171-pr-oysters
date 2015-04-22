@@ -92,8 +92,8 @@ body {
     <div width=400 id="oysterVis"></div>
     <div id="waterVis"></div>
     <div id="selectLevel">
-        <label>Surface <input type="checkbox" name="level" value="surface" checked /></label>
-        <label>Bottom <input type="checkbox" name="level" value="bottom" checked /></label>
+        <label>Surface <input class="level" id="checkSurface" type="checkbox" name="surface" value="surface" checked /></label>
+        <label>Bottom <input class="level" id="checkBottom" type="checkbox" name="bottom" value="bottom" checked /></label>
         <button type="button" id="clear">Clear</button>      
     </div>
     <script>
@@ -192,6 +192,7 @@ body {
                     })
                     .on("click", function(d) { 
                         drawWater(d.station);
+                        pathVisible();
 
                         node
                             .classed("clickedStation", function(k) {if (k.station == d.station) {return true;}});
@@ -353,12 +354,12 @@ body {
                 svg.select(".y.axis")
                     .call(yAxisW);
 
-                var surface = svg.append("path")
+                svg.append("path")
                     .datum(water_b)
                     .attr("class", "wbottom")
                     .style("stroke", function() {return color(stationCount);})
                     .attr("d", line);
-
+                
 /*                surface.append("text")
                     .text("test");
                    .attr("x", function() {return 8;})
@@ -370,13 +371,13 @@ body {
 
                 //append bottom depth values to bottom lines and add legend
 
-                svg.append("path")
-                    .datum(water_s)
+                   svg.append("path")
+                     .datum(water_s)
                     .attr("class", "wsurface")
                     .style("stroke-dasharray", ("3, 3"))
                     .style("stroke", function() {return color(stationCount);})
                     .attr("d", line);
-        
+                       
             }
 
             function clearWater() {
@@ -440,7 +441,7 @@ body {
 
                 svg.append("path")
                     .datum(waterYear)
-                    .attr("class", "wsurface")
+                    .attr("class", "line")
                     .style("stroke", "blue")
                     .attr("d", line);                    
       
@@ -591,7 +592,32 @@ console.log(waterYear);
             }
 
             startHere();
-        })
+
+
+        d3.selectAll("input.level")
+            .on("change", function() {
+                pathVisible();
+            });
+
+        function pathVisible() {
+               if(d3.select("#checkSurface").node().checked) {
+                    d3.selectAll("path.wsurface")
+                        .style("opacity", 1);
+                } else {
+                    d3.selectAll("path.wsurface")
+                        .style("opacity", 0);                    
+                }
+
+                if(d3.select("#checkBottom").node().checked) {
+                    d3.selectAll("path.wbottom")
+                        .style("opacity", 1);
+                } else {
+                    d3.selectAll("path.wbottom")
+                        .style("opacity", 0);                    
+                }                
+        }
+    })
+
     </script>
 </body>
 </html>

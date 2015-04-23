@@ -71,6 +71,12 @@ body {
 .unclickedId {
     opacity: 0;
 }
+.clickedYear {
+    fill: red;
+}
+.hoverYear {
+    fill: red;
+}
 
 </style>
 
@@ -200,7 +206,10 @@ body {
                             .classed("clickedStation", function(k) {if (k.station == d.station) {return true;}});
  //                       stationid.style("opacity", 0);
  //                       stationid.style("opacity", function(k) {if (k.station == d.station) {return 1;} else { return 0;}});
-                    })
+                    });
+
+                node.append("svg:title")
+                    .text(function(d) {return d.description + " (" + d.county + " county)";});
 
                 node.transition().duration(500)
                     .attr("transform", function(d) { 
@@ -229,7 +238,7 @@ body {
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text("Oyster Landings by Year").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").text("Maryland Oyster Landings by Year").attr("x", 80).attr("y", 0).style("font", "12px sans-serif");
 
                 var line = d3.svg.line()
                     .x(function(d) { return xScale(d.year); })
@@ -359,7 +368,13 @@ body {
                     .attr("class", "wbottom")
                     .style("stroke", function() {return color(stationCount);})
                     .attr("d", line);
-                
+/*var testv = yScaleW(.40);
+                svg.append("text")
+                    .attr("transform", "translate(430," + testv + ")")
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "start")
+                    .style("fill", "red")
+                    .text(station); */
 /*                surface.append("text")
                     .text("test");
                    .attr("x", function() {return 8;})
@@ -371,8 +386,8 @@ body {
 
                 //append bottom depth values to bottom lines and add legend
 
-                   svg.append("path")
-                     .datum(water_s)
+                svg.append("path")
+                    .datum(water_s)
                     .attr("class", "wsurface")
                     .style("stroke-dasharray", ("3, 3"))
                     .style("stroke", function() {return color(stationCount);})
@@ -475,9 +490,7 @@ body {
                     }
                     return res;
                 });
-
-console.log(waterYear);
-
+//console.log(waterYear);
                 var margin = {top:20, right:20, bottom:30, left:80};
                 var width = 450 - margin.left - margin.right;
                 var height = 250 - margin.top - margin.bottom;
@@ -497,10 +510,34 @@ console.log(waterYear);
 
                 svg.append("text").text("Yearly " + measure + " Averages").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
 
+                var bar = svg.append("g").selectAll(".bar")
+                    .data(waterYear)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "bar")
+                    .style("fill", "blue")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", 10)
+                    .attr("height", function(d){return height - yScale(d.mvalue)})
+                    .attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + yScale(d.mvalue) + ")"; })
+                    .on("mouseover", function(d){
+                    //    d3.select(this).style("fill", "red");
+                        d3.select(this).classed("hoverYear", true);
+                    })
+                    .on("mouseout", function(d){
+                    //    d3.select(this).style("fill", "blue");
+                        d3.select(this).classed("hoverYear", false);
+                    })
+                    .on("click", function(d){
+                        d3.select(this).classed("clickedYear", true);
+                        selectedYear = d.year;  //need parseInt?
+                    });
+/*
                 var line = d3.svg.line()
                     .x(function(d) { return xScale(d.month); })
                     .y(function(d) { return yScale(d.mvalue); });
-
+*/
                 var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
@@ -509,13 +546,13 @@ console.log(waterYear);
                 var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left"); 
-
+/*
                 svg.append("path")
                     .datum(waterYear)
                     .attr("class", "wsurface")
                     .style("stroke", "blue")
                     .attr("d", line);                    
-      
+ */     
                 svg.append("g")
                     .attr("class", "x axis")
                     .attr("transform", "translate(0," + height + ")")

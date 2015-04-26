@@ -57,6 +57,11 @@ body {
     margin-left: 850px;
     margin-top: 0px;
 }
+#sources{
+    position: relative;
+    margin-left: 0px;
+    margin-top: 0px;
+}
 .line, 
 .wbottom, 
 .wsurface {
@@ -76,6 +81,14 @@ body {
 }
 .hoverYear {
     fill: lightblue;
+}
+a:link {
+    color: blue;
+    text-decoration: none;
+}
+a:hover {
+    color: red;
+    text-decoration: underline;
 }
 
 </style>
@@ -103,6 +116,15 @@ body {
         <label>Surface <input class="level" id="checkSurface" type="checkbox" name="surface" value="surface" checked /></label>
         <label>Bottom <input class="level" id="checkBottom" type="checkbox" name="bottom" value="bottom" checked /></label>
         <button type="button" id="clear">Clear</button>      
+    </div>
+    <div id="sources">
+        Data Sources:
+        <br />
+        Water Quality Data: <a href="http://www.chesapeakebay.net">Chesapeake Bay Program</a>
+        <br />
+        Oyster Data (1929-2004): <a href="http://mddnr.chesapeakebay.net/mdcomfish/oyster/totoymcfquery.cfm?value=oyster">Maryland DNR</a>
+        <br />
+        Oyster Data (1950-2012): <a href="http://www.st.nmfs.noaa.gov/st1/commercial/landings/annual_landings.html">NOAA Fisheries</a>
     </div>
     <script>
 

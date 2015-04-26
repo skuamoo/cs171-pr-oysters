@@ -10,7 +10,7 @@
     <script src="libs/queue/queue.v1.min.js"></script>
     <script src="libs/topojson/topojson.v1.min.js"></script>
 
-<style>
+<style type="text/css">
 body { 
     font: 10px sans-serif; 
 } 
@@ -65,17 +65,17 @@ body {
   stroke-width: 1.5px;
 }
 .clickedStation {
-    fill: red;
     opacity: 1;
 }
-.unclickedId {
-    opacity: 0;
+.hoverStation {
+    fill: red;
+    opacity: 1;
 }
 .clickedYear {
     fill: red;
 }
 .hoverYear {
-    fill: red;
+    fill: lightblue;
 }
 
 </style>
@@ -84,18 +84,20 @@ body {
 <body>
     <div><text id="selectedYear"></text>
     <div>
-        <label><input class="measure" type="radio" name="measure" value="tn" checked>Nitrogen</label>
-        <label><input class="measure" type="radio" name="measure" value="tp" >Phosphorous</label>
-        <label><input class="measure" type="radio" name="measure" value="do" >Dissolved Oxygen</label>
-        <label><input class="measure" type="radio" name="measure" value="salinity" >Salinity</label>
-        <label><input class="measure" type="radio" name="measure" value="wtemp" >Water Temp</label>
+        <label><input class="measure" type="radio" name="measure" value="TN" checked>Nitrogen</label>
+        <label><input class="measure" type="radio" name="measure" value="TP" >Phosphorous</label>
+        <label><input class="measure" type="radio" name="measure" value="DO" >Dissolved Oxygen</label>
+        <label><input class="measure" type="radio" name="measure" value="PH" >PH</label>
+        <label><input class="measure" type="radio" name="measure" value="WTEMP" >Water Temp</label>
+        <label><input class="measure" type="radio" name="measure" value="SALINITY" >Salinity</label>
+        <label><input class="measure" type="radio" name="measure" value="SECCHI" >Water Clarity Depth</label>
 
     </div>
     <div class="container">
     <div id="yearWaterVis"></div>
     <div id="monthWaterVis"></div>
-    <div width=600 id="bayVis"></div>
-    <div width=400 id="oysterVis"></div>
+    <div id="bayVis"></div>
+    <div id="oysterVis"></div>
     <div id="waterVis"></div>
     <div id="selectLevel">
         <label>Surface <input class="level" id="checkSurface" type="checkbox" name="surface" value="surface" checked /></label>
@@ -118,6 +120,14 @@ body {
             var stationCount = 0;
             var color = d3.scale.category10();
             var wmax = 0;
+            var units = "MG/L";
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var measureCode = {"TN": "Total Nitrogen", "TP": "Total Phosphorous", "DO": "Dissolved Oxygen", "SALINITY": "Salinity", "SECCHI": "Secchi Clarity Depth", "WTEMP": "Water Temperature", "PH": "PH"};
+            var measureUnits = {"TN": "MG/L", "TP": "MG/L", "DO": "MG/L", "SALINITY": "PPT", "SECCHI": "M", "WTEMP": "Deg C", "PH": "S"};
+            var margin = {top:20, right:20, bottom:30, left:80};
+            var width = 450 - margin.left - margin.right;
+            var height = 250 - margin.top - margin.bottom;
+            var padding = 10;
 
             d3.select("#clear")
                 .on("click", clearWater);
@@ -126,12 +136,13 @@ body {
 
                 var EventHandler = new Object();
 
-                d3.select("#selectedYear").text("Chesapeake Bay Water Quality - " + selectedYear).style("font-size", "18px");
+                d3.select("#selectedYear").text("Chesapeake Bay Water Quality - " + selectedYear).style("font-size", "18px").attr("id", "titleYear");
                 drawYearWater();
                 drawMonthWater();
                 drawCoast();
                 drawOyster();
                 drawWaterSetup();
+                updateTitles();
             } 
 
             function drawCoast() {
@@ -169,8 +180,8 @@ body {
                     .attr("r", 5)
                     .style("cursor", "pointer")
                     .style("stroke", "white")
-//                    .style("fill", "black")
-                    .style("opacity", 0.8);
+                    .attr("fill", "black")
+                    .attr("opacity", 0.8);
         
                 var stationid = node.append("text")
                     .text(function(d) {return d.station;})
@@ -179,33 +190,25 @@ body {
                     .attr("transform", function() {
                         return "rotate(-15)" 
                     })
-                    .style("opacity", 0);
+                    .attr("opacity", 0)
+                    .attr("fill", "red")
+                    .attr("stroke", "red");
 
                 node
                     .on("mouseover", function(d) {
-                            d3.select(this).attr("fill", "red");
-                            stationid.style("opacity", function(k) {if (k.station == d.station) {return 1;} else { return 0;}});
-                        })
+                        d3.select(this).selectAll("circle").classed("hoverStation", true);
+                        d3.select(this).selectAll("text").classed("hoverStation", true);
+                    })
                     .on("mouseout", function() {
-//                        if(!clicked) {
-//                            stationid.style("opacity", 0);
-                            stationid.classed("unclickedId")
-                            d3.select(this).attr("fill", "black");
-//                        }
-//                        else {
-//                            clicked = false;
-//                        }
+                        d3.select(this).selectAll("circle").classed("hoverStation", false);
+                        d3.select(this).selectAll("text").classed("hoverStation", false);
                     })
                     .on("click", function(d) { 
                         drawWater(d.station);
                         pathVisible();
-
-                        node
-                            .classed("clickedStation", function(k) {if (k.station == d.station) {return true;}});
-                        stationid
-                            .classed("clickedStation", function(k) {if (k.station == d.station) {return true;}});
- //                       stationid.style("opacity", 0);
- //                       stationid.style("opacity", function(k) {if (k.station == d.station) {return 1;} else { return 0;}});
+                        d3.select(this).selectAll("circle").classed("hoverStation", false);
+                        d3.select(this).selectAll("circle").classed("clickedStation", true).attr("fill", function(d) {return color(stationCount);})
+                        d3.select(this).selectAll("text").classed("clickedStation", true);
                     });
 
                 node.append("svg:title")
@@ -221,13 +224,8 @@ body {
 
                 var oystermd = landingsData.filter(function(d) { return d.species == "Oyster" && d.state == "Maryland";});
 
-                var margin = {top:20, right:20, bottom:30, left:80};
-                var width = 450 - margin.left - margin.right;
-                var height = 250 - margin.top - margin.bottom;
-                var padding = 10;
-
                 var xScale = d3.scale.linear().range([0, width])
-                    .domain([1929, 2013]);
+                    .domain([1929, 2014]);
                 var yScale = d3.scale.linear()
                     .range([height, 10])
                     .domain([0, d3.max(oystermd, function(d) { return d.pounds; })]);
@@ -268,14 +266,48 @@ body {
                     .attr("class", "line")
                     .attr("d", line);
 
+                var drag = d3.behavior.drag() // <-A
+                    .on("drag", function () {
+                        var x = d3.event.x;
+
+                        if (x >= xScale(1984) && x <= xScale(2014)) {
+                            d3.select(this)
+                                .attr("x1", x)
+                                .attr("x2", x);
+                            selectedYear = parseInt(xScale.invert(x));
+                            d3.select("#yearText")
+                                .attr("x", x-25)
+                                .attr("opacity", 1)
+                                .text(selectedYear);
+//                            changeYear(selectedYear, "oysterChart");
+                        }
+
+                    })
+                    .on("dragend", function() {
+                        d3.select("#yearText")
+                            .attr("opacity", 0);
+                        changeYear(selectedYear, "oysterChart");
+                    });
+
                 svg.append("line")
+                    .attr("id", "oysterLine")
                     .attr("x1", xScale(selectedYear))  
                     .attr("y1", 0)
                     .attr("x2", xScale(selectedYear))  
                     .attr("y2", height)
-                    .style("stroke-width", 1)
-                    .style("stroke", "red")
-                    .style("fill", "none");
+                    .attr("stroke-width", 3)
+                    .attr("stroke", "red")
+                    .attr("fill", "red")
+                    .attr("opacity", 0.8)
+                    .style("cursor", "pointer")
+                    .call(drag);
+
+                svg.append("text")
+                    .text(selectedYear)
+                    .attr("id", "yearText")
+                    .attr("x", xScale(selectedYear)-25)
+                    .attr("y", height/2)
+                    .attr("opacity", 0);
 
             }
 
@@ -293,33 +325,24 @@ body {
                     .attr("class","water")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text(measure + " by Station").attr("x", 110).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").attr("x", 110).attr("y", 0).attr("id", "stationText").style("font", "12px sans-serif");
 
-                svg.append("text").text("Click multiple stations to compare").attr("x", 100).attr("y", 100).attr("id", "stationClick");
-/*                var options = svg.append("g")
-                    .attr("x", 100)
-                    .attr("y", 0);
-                options
-                    .append("label")
-                    .append("text")
-                        .text("surface");
-                options
-                    .append("input")
-                        .attr("type", "checkbox")
-                        .attr("name", "surface")
-                        .attr("value", "surface"); */
+                svg.append("text").text("Click multiple stations to compare for selected year").attr("x", 70).attr("y", 100).attr("id", "stationClick");
 
                 var water = waterQualityData.filter(function(d) { return d.parameter == measure;});
 
-                xScaleW = d3.scale.linear().range([0, width])
-                    .domain([d3.min(water, function(d) {return parseInt(d.month);}), d3.max(water, function(d) {return parseInt(d.month);})]);
+                xScaleW = d3.time.scale()
+                    .range([0, width])
+                    .domain([new Date(1984,1,1), new Date(2014, 12, 31)]);
+//                    .domain(d3.extent(water, function(d) { return d.date; }));
+
                 yScaleW = d3.scale.linear()
                     .range([height, 10]);
 
                 var xAxis = d3.svg.axis()
                     .scale(xScaleW)
-                    .orient("bottom")
-                    .tickFormat(d3.format("d"));
+                    .orient("bottom");
+//                    .tickFormat(function(i) { return months[i-1];});
 
                 yAxisW = d3.svg.axis()
                     .scale(yScaleW)
@@ -336,6 +359,47 @@ body {
                     .attr("id", "yaxw")
                     .attr("id", "yaxis");
 
+                var drag = d3.behavior.drag() // <-A
+                    .on("drag", function () {
+                        var x = d3.event.x;
+
+                        d3.select(this)
+                            .attr("x1", x)
+                            .attr("x2", x);
+                        selectedYear = (xScaleW.invert(x)).getFullYear();
+
+                        d3.select("#yearTextW")
+                            .attr("x", x-25)
+                            .attr("opacity", 1)
+                            .text(selectedYear);                     
+
+                    })
+                    .on("dragend", function() {
+                        d3.select("#yearTextW")
+                            .attr("opacity", 0);
+                        changeYear(selectedYear, "stationChart");
+                    });
+
+                svg.append("line")
+                    .attr("id", "stationLine")
+                    .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
+                    .attr("y1", 0)
+                    .attr("x2", xScaleW(new Date(selectedYear, 1, 1)))  
+                    .attr("y2", height)
+                    .attr("stroke-width", 3)
+                    .attr("stroke", "red")
+                    .attr("fill", "red")
+                    .attr("opacity", 0.8)
+                    .style("cursor", "pointer")
+                    .call(drag);
+
+                svg.append("text")
+                    .text(selectedYear)
+                    .attr("id", "yearTextW")
+                    .attr("x", xScaleW(new Date(selectedYear, 1, 1))-25)
+                    .attr("y", height/2)
+                    .attr("opacity", 0);
+
             }
 
             function drawWater(station) {
@@ -343,8 +407,8 @@ body {
                 stationCount += 1;
 
                 var water = waterQualityData.filter(function(d) { return d.station == station && d.parameter == measure;});
-                var water_b = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "B " && d.parameter == measure;});
-                var water_s = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "S " && d.parameter == measure;});
+                var water_b = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "B" && d.parameter == measure;});
+                var water_s = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "S" && d.parameter == measure;});
 
                 var stationmax = d3.max(water, function(d) { return d.mvalue; });
                 if (stationmax > wmax) {
@@ -357,7 +421,7 @@ body {
                     .domain([0, wmax]);
 
                 var line = d3.svg.line()
-                    .x(function(d) { return xScaleW(d.month); })
+                    .x(function(d) { return xScaleW(d.date); })
                     .y(function(d) { return yScaleW(d.mvalue); });
 
                 svg.select(".y.axis")
@@ -368,23 +432,6 @@ body {
                     .attr("class", "wbottom")
                     .style("stroke", function() {return color(stationCount);})
                     .attr("d", line);
-/*var testv = yScaleW(.40);
-                svg.append("text")
-                    .attr("transform", "translate(430," + testv + ")")
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", "start")
-                    .style("fill", "red")
-                    .text(station); */
-/*                surface.append("text")
-                    .text("test");
-                   .attr("x", function() {return 8;})
-                    .attr("y", function() {return 3;})
-                    .attr("transform", function() {
-                        return "rotate(-15)" 
-                    }) */
-
-
-                //append bottom depth values to bottom lines and add legend
 
                 svg.append("path")
                     .datum(water_s)
@@ -399,10 +446,13 @@ body {
                 d3.select("#waterVis").select("svg").remove();
                 drawWaterSetup();
                 d3.select("#stationClick").style("opacity", 1);
+                d3.selectAll("text").classed("clickedStation", false);
+                d3.selectAll("circle").classed("clickedStation", false).attr("fill", "black").attr("opacity", 0.8);
             }
 
             function drawMonthWater() {
-                var layer = "B ";
+
+                var layer = "B";
                 var water_year = waterQualityData.filter(function(d) { return d.year == selectedYear && d.mlayer == layer && d.parameter == measure;});
 
                 //Aggregate water quality data by year to draw first graph
@@ -415,17 +465,12 @@ body {
  
                 waterYear = waterYear.map(function(d) {
                     var res = {
-                        year: 2014,
+                        year: d.year,
                         month: d.key,
                         mvalue: d.values[0]
                     }
                     return res;
                 });
-
-                var margin = {top:20, right:20, bottom:30, left:80};
-                var width = 450 - margin.left - margin.right;
-                var height = 250 - margin.top - margin.bottom;
-                var padding = 10;
 
                 var xScale = d3.scale.linear().range([0, width])
                     .domain([1, 12]);
@@ -439,7 +484,7 @@ body {
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text("Monthly " + measure + " Averages").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").attr("x", 100).attr("y", 0).attr("id", "monthText").style("font", "12px sans-serif");
 
                 var line = d3.svg.line()
                     .x(function(d) { return xScale(d.month); })
@@ -448,13 +493,15 @@ body {
                 var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
-                    .tickFormat(d3.format("d"));
+//                    .tickFormat(d3.format("d"));
+                    .tickFormat(function(i) { return months[i-1];}); 
 
                 var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left"); 
 
                 svg.append("path")
+                    .attr("id", "monthPath")
                     .datum(waterYear)
                     .attr("class", "line")
                     .style("stroke", "blue")
@@ -467,12 +514,12 @@ body {
 
                 svg.append("g")
                     .attr("class", "y axis")
-                    .attr("id", "yaxis")
+                    .attr("id", "yaxism")
                     .call(yAxis);     
             }
 
             function drawYearWater() {
-                var layer = "B ";
+                var layer = "B";
                 var water_year = waterQualityData.filter(function(d) { return d.mlayer == layer && d.parameter == measure;});
 
                 //Aggregate water quality data by year to draw first graph
@@ -490,11 +537,6 @@ body {
                     }
                     return res;
                 });
-//console.log(waterYear);
-                var margin = {top:20, right:20, bottom:30, left:80};
-                var width = 450 - margin.left - margin.right;
-                var height = 250 - margin.top - margin.bottom;
-                var padding = 10;
 
                 var xScale = d3.scale.linear().range([0, width])
                     .domain([1984, 2014]);
@@ -508,36 +550,51 @@ body {
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text("Yearly " + measure + " Averages").attr("x", 100).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").attr("x", 100).attr("y", 0).attr("id", "yearGraphText").style("font", "12px sans-serif");
 
                 var bar = svg.append("g").selectAll(".bar")
                     .data(waterYear)
                     .enter()
                     .append("rect")
-                    .attr("class", "bar")
-                    .style("fill", "blue")
+                    .attr("class", function(d) {if (d.year == selectedYear) {return "bar clickedYear";} else {return "bar";}})
+                    .attr("fill", "blue") //function(d) {if (d.year == selectedYear) {return "red";} else {return "blue";}})
+                    .style("cursor", "pointer")
                     .attr("x", 0)
                     .attr("y", 0)
                     .attr("width", 10)
                     .attr("height", function(d){return height - yScale(d.mvalue)})
-                    .attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + yScale(d.mvalue) + ")"; })
+                    .attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + yScale(d.mvalue) + ")"; });
+
+                svg.append("text")
+                    .text(selectedYear)
+                    .attr("id", "yearID")
+                    .attr("x", 0)
+                    .attr("y", 10)
+                    .attr("fill", "black")
+                    .attr("opacity", 0);
+
+                bar
                     .on("mouseover", function(d){
-                    //    d3.select(this).style("fill", "red");
                         d3.select(this).classed("hoverYear", true);
+                        d3.select("#yearID")
+                            .text(d.year)
+                            .attr("opacity", 1)
+                            .attr("x", xScale(d.year)-5)
+                            .attr("y", yScale(d.mvalue)-5);
                     })
                     .on("mouseout", function(d){
-                    //    d3.select(this).style("fill", "blue");
                         d3.select(this).classed("hoverYear", false);
+                        d3.select("#yearID")
+                            .attr("opacity", 0);
                     })
                     .on("click", function(d){
+                        d3.selectAll(".bar").classed("clickedYear", false);
+                        d3.select(this).classed("hoverYear", false);
                         d3.select(this).classed("clickedYear", true);
                         selectedYear = d.year;  //need parseInt?
+                        changeYear(d.year, "yearChart");
                     });
-/*
-                var line = d3.svg.line()
-                    .x(function(d) { return xScale(d.month); })
-                    .y(function(d) { return yScale(d.mvalue); });
-*/
+
                 var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
@@ -546,13 +603,7 @@ body {
                 var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left"); 
-/*
-                svg.append("path")
-                    .datum(waterYear)
-                    .attr("class", "wsurface")
-                    .style("stroke", "blue")
-                    .attr("d", line);                    
- */     
+
                 svg.append("g")
                     .attr("class", "x axis")
                     .attr("transform", "translate(0," + height + ")")
@@ -560,8 +611,187 @@ body {
 
                 svg.append("g")
                     .attr("class", "y axis")
-                    .attr("id", "yaxis")
+                    .attr("id", "yaxisy")
                     .call(yAxis);     
+            }
+
+            function changeYear (year, chart) {
+
+                selectedYear = year;
+                var layer = "B";
+
+                if(measure == "SECCHI") {
+                    layer = "S";
+                }
+
+                var water_year = waterQualityData.filter(function(d) { return d.year == selectedYear && d.mlayer == layer && d.parameter == measure;});
+
+                //Aggregate water quality data by year to draw first graph
+                var waterYear = d3.nest()
+                    .key(function(d) {return d.month;})
+                    .rollup(function(d) {return [
+                        d3.mean(d, function(d) {return parseFloat(d.mvalue);})
+                    ]})
+                    .entries(water_year);
+ 
+                waterYear = waterYear.map(function(d) {
+                    var res = {
+                        year: selectedYear,
+                        month: d.key,
+                        mvalue: d.values[0]
+                    }
+                    return res;
+                });
+
+                var xScale = d3.scale.linear().range([0, width])
+                    .domain([1, 12]);
+
+                var yScale = d3.scale.linear()
+                    .range([height, 10])
+                    .domain([0, d3.max(waterYear, function(d) { return d.mvalue; })])
+
+                var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left"); 
+
+                d3.select("#yaxism")
+                    .call(yAxis);     
+
+                var line = d3.svg.line()
+                    .x(function(d) { return xScale(d.month); })
+                    .y(function(d) { return yScale(d.mvalue); });
+
+                d3.select("#monthPath")
+                    .datum(waterYear)
+                    .transition()
+                    .attr("d", line);   
+
+                var xScaleO = d3.scale.linear().range([0, width])
+                    .domain([1929, 2014]);
+
+                var xScaleW = d3.time.scale()
+                    .range([0, width])
+                    .domain([new Date(1984,1,1), new Date(2014, 12, 31)]);
+
+                d3.select("#oysterLine")
+                    .transition()
+                    .attr("x1", xScaleO(selectedYear))  
+                    .attr("x2", xScaleO(selectedYear));  
+
+                d3.select("#stationLine")
+                    .transition()
+                    .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
+                    .attr("x2", xScaleW(new Date(selectedYear, 1, 1))); 
+
+//                clearWater();
+
+                d3.select("#titleYear")
+                    .text("Chesapeake Bay Water Quality - " + selectedYear);
+
+                d3.selectAll(".bar")
+                    .classed("clickedYear", function(d) {if(d.year == selectedYear) {return true;} else {return false;}});
+            }
+
+            function changeMeasure(measure) {
+
+                updateTitles();
+                var layer = "B";
+
+                if(measure == "SECCHI") {
+                    layer = "S";
+                }
+
+                var water_year = waterQualityData.filter(function(d) { return d.year == selectedYear && d.mlayer == layer && d.parameter == measure;});
+
+                var water_all = waterQualityData.filter(function(d) { return d.mlayer == layer && d.parameter == measure;});
+
+                var waterAll = d3.nest()
+                    .key(function(d) {return d.year;})
+                    .rollup(function(d) {return [
+                        d3.mean(d, function(d) {return parseFloat(d.mvalue);})
+                    ]})
+                    .entries(water_all);
+ 
+                waterAll = waterAll.map(function(d) {
+                    var res = {
+                        year: d.key,
+                        mvalue: d.values[0]
+                    }
+                    return res;
+                });
+
+                //Aggregate water quality data by year to draw first graph
+                var waterYear = d3.nest()
+                    .key(function(d) {return d.month;})
+                    .rollup(function(d) {return [
+                        d3.mean(d, function(d) {return parseFloat(d.mvalue);})
+                    ]})
+                    .entries(water_year);
+ 
+                waterYear = waterYear.map(function(d) {
+                    var res = {
+                        year: selectedYear,
+                        month: d.key,
+                        mvalue: d.values[0]
+                    }
+                    return res;
+                });
+
+                var xScale = d3.scale.linear().range([0, width])
+                    .domain([1, 12]);
+
+                var xScale2 = d3.scale.linear().range([0, width])
+                    .domain([1984, 2014]);
+
+                var yScale = d3.scale.linear()
+                    .range([height, 10])
+                    .domain([0, d3.max(waterYear, function(d) { return d.mvalue; })]);
+
+                var yScale2 = d3.scale.linear()
+                    .range([height, 10])
+                    .domain([0, d3.max(waterAll, function(d) { return d.mvalue; })]);
+
+                var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left"); 
+
+                var yAxis2 = d3.svg.axis()
+                    .scale(yScale2)
+                    .orient("left");
+
+                d3.select("#yaxism")
+                    .call(yAxis);   
+
+                d3.select("#yaxisy")
+                    .call(yAxis2);  
+
+                var line = d3.svg.line()
+                    .x(function(d) { return xScale(d.month); })
+                    .y(function(d) { return yScale(d.mvalue); });
+
+                d3.select("#monthPath")
+                    .datum(waterYear)
+                    .transition()
+                    .attr("d", line);  
+
+                d3.selectAll(".bar")
+                    .attr("height", function(d){return height - yScale2(d.mvalue);})
+                    .attr("transform", function(d) {return "translate(" + xScale2(d.year) + "," + yScale2(d.mvalue) + ")"; });  
+
+                clearWater();
+            }
+
+            function updateTitles() {
+
+                d3.selectAll("#monthText")
+                    .text("Monthly " + measureCode[measure] + " Averages (" + measureUnits[measure] + ")");
+
+                d3.selectAll("#yearGraphText")
+                    .text("Yearly " + measureCode[measure] + " Averages (" + measureUnits[measure] + ")");
+
+                d3.selectAll("#stationText")
+                    .text(measureCode[measure] + " by Station (" + measureUnits[measure] + ")");
+
             }
 
             var dataLoaded = function (error, _waterQuality, _stationInfo, _landings, _topomap) {
@@ -599,6 +829,7 @@ body {
                             station: d.Station,
                             month: d.Month,
                             year: d.Year,
+                            date: new Date(d.Year, d.Month),
                             depth: d.Total_Depth,
                             mlayer: d.Layer,
                             parameter: d.Parameter,
@@ -619,8 +850,8 @@ body {
             var startHere = function(){
 
                 queue()
-                    .defer(d3.csv, 'data/waterQuality2014.csv')
-                    .defer(d3.csv, 'data/StationInfoRefined.csv')
+                    .defer(d3.csv, 'data/waterQualityFullClean.csv')
+                    .defer(d3.csv, 'data/StationInfoAll.csv')
                     .defer(d3.csv, 'data/OysterCrabLandings.csv')
                     .defer(d3.json, 'data/shapefile/chesapeaketopo4.json')
                     .await(function(error, waterQuality, stationInfo, landings, topomap) {
@@ -653,6 +884,12 @@ body {
                         .style("opacity", 0);                    
                 }                
         }
+
+        d3.selectAll("input.measure")
+            .on("change", function() {
+                measure = d3.select(this).property("value");
+                changeMeasure(measure);
+            }); 
     })
 
     </script>

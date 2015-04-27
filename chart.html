@@ -717,7 +717,6 @@ a:hover {
                     .domain([1, 12]);
                 var yScale = d3.scale.linear()
                     .range([height, 10])
-//                    .domain([0, function() { if (maxValB > maxValS) {return maxValB;} else {return maxValS;}}]);
                     .domain([0, maxVal]);
 
                 var yAxis = d3.svg.axis()
@@ -763,8 +762,6 @@ a:hover {
                     .transition()
                     .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
                     .attr("x2", xScaleW(new Date(selectedYear, 1, 1))); 
-
-//                clearWater();
 
                 d3.select("#titleYear")
                     .text("Chesapeake Bay Water Quality - " + selectedYear);
@@ -883,8 +880,8 @@ a:hover {
                     .attr("d", line);  
 
                 d3.selectAll(".bar")
-                    .attr("height", function(d){return height - yScale2(d.mvalue);})
-                    .attr("transform", function(d) {return "translate(" + xScale2(d.year) + "," + yScale2(d.mvalue) + ")"; });  
+                    .attr("height", function(d){return yScale2(d.mvalue);})
+                    .attr("transform", function(d) {return "translate(" + xScale2(d.year) + "," + yScale2(d.mvalue) + ")"; }); 
 
                 clearWater();
             }

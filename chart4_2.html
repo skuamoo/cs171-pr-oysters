@@ -550,7 +550,6 @@ a:hover {
                     .domain([1, 12]);
                 var yScale = d3.scale.linear()
                     .range([height, 10])
-//                    .domain([0, function() { if (maxValB > maxValS) {return maxValB;} else {return maxValS;}}]);
                     .domain([0, maxVal]);
 
                 var svg = d3.select("#monthWaterVis").append("svg")

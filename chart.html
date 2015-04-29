@@ -90,6 +90,11 @@ a:hover {
     color: red;
     text-decoration: underline;
 }
+rect.pane {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
 
 </style>
 
@@ -149,7 +154,6 @@ a:hover {
             var margin = {top:20, right:20, bottom:30, left:80};
             var width = 450 - margin.left - margin.right;
             var height = 250 - margin.top - margin.bottom;
-            var padding = 10;
 
             d3.select("#clear")
                 .on("click", clearWater);
@@ -172,7 +176,6 @@ a:hover {
                 var margin = {top:20, right:20, bottom:30, left:80};
                 var width = 310 - margin.left - margin.right;
                 var height = 700 - margin.top - margin.bottom;
-                var padding = 10;
 
                 var svg = d3.select("#bayVis").append("svg")
                     .attr("width", width + margin.left + margin.right)
@@ -430,6 +433,30 @@ a:hover {
                     .attr("x", xScaleW(new Date(selectedYear, 1, 1))-25)
                     .attr("y", height/2)
                     .attr("opacity", 0);
+
+                var zoom = d3.behavior.zoom()
+                    .x(xScaleW)
+                    .scaleExtent([1, 10])
+                    .size([width, height])
+                    .on("zoom", function() {
+                        svg.select("g.x.axis").call(xAxis);
+                        svg.select("g.y.axis").call(yAxisW);
+                        svg.selectAll(".stationPath").attr("d", line);
+                        d3.select("#stationLine")
+                            .transition()
+                            .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
+                            .attr("x2", xScaleW(new Date(selectedYear, 1, 1))); 
+                    })
+
+                svg.append("rect")
+                    .attr("class", "pane")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .call(zoom);
+
+                var line = d3.svg.line()
+                    .x(function(d) { return xScaleW(d.date); })
+                    .y(function(d) { return yScaleW(d.mvalue); });
 
             }
 

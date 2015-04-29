@@ -261,7 +261,7 @@ rect.pane {
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").text("Maryland Oyster Landings by Year").attr("x", 80).attr("y", 0).style("font", "12px sans-serif");
+                svg.append("text").text("Maryland Oyster Landings by Year (Pounds of Meat)").attr("x", 40).attr("y", 0).style("font", "12px sans-serif");
 
                 var line = d3.svg.line()
                     .x(function(d) { return xScale(d.year); })
@@ -360,7 +360,7 @@ rect.pane {
                     .attr("class","water")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                svg.append("text").attr("x", 110).attr("y", 0).attr("id", "stationText").style("font", "12px sans-serif");
+                svg.append("text").attr("x", 85).attr("y", 0).attr("id", "stationText").style("font", "12px sans-serif");
 
                 svg.append("text").text("Click multiple stations to compare").attr("x", 100).attr("y", 100).attr("id", "stationClick");
 
@@ -523,6 +523,7 @@ rect.pane {
                 d3.selectAll("text").classed("clickedStation", false);
                 d3.selectAll("circle").classed("clickedStation", false).attr("fill", "black").attr("opacity", 0.8);
                 wmax = 0;
+                updateTitles();
             }
 
             function aggregateData(layer, aggType) {
@@ -577,7 +578,6 @@ rect.pane {
                     .domain([1, 12]);
                 var yScale = d3.scale.linear()
                     .range([height, 10])
-//                    .domain([0, function() { if (maxValB > maxValS) {return maxValB;} else {return maxValS;}}]);
                     .domain([0, maxVal]);
 
                 var svg = d3.select("#monthWaterVis").append("svg")
@@ -792,10 +792,10 @@ rect.pane {
 
             function changeMeasure(measure) {
 
-                updateTitles();
                 updateMonthWater();
                 updateYearWater();
                 clearWater();
+//                updateTitles();
             }
 
             function updateTitles() {

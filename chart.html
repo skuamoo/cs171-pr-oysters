@@ -414,19 +414,6 @@ rect.pane {
                         changeYear(selectedYear);
                     });
 
-                svg.append("line")
-                    .attr("id", "stationLine")
-                    .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
-                    .attr("y1", 0)
-                    .attr("x2", xScaleW(new Date(selectedYear, 1, 1)))  
-                    .attr("y2", height)
-                    .attr("stroke-width", 3)
-                    .attr("stroke", "red")
-                    .attr("fill", "red")
-                    .attr("opacity", 0.8)
-                    .style("cursor", "pointer")
-                    .call(drag);
-
                 svg.append("text")
                     .text(selectedYear)
                     .attr("id", "yearTextW")
@@ -453,6 +440,19 @@ rect.pane {
                     .attr("width", width)
                     .attr("height", height)
                     .call(zoom);
+
+                svg.append("line")
+                    .attr("id", "stationLine")
+                    .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
+                    .attr("y1", 0)
+                    .attr("x2", xScaleW(new Date(selectedYear, 1, 1)))  
+                    .attr("y2", height)
+                    .attr("stroke-width", 3)
+                    .attr("stroke", "red")
+                    .attr("fill", "red")
+                    .attr("opacity", 0.8)
+                    .style("cursor", "pointer")
+                    .call(drag);
 
                 var line = d3.svg.line()
                     .x(function(d) { return xScaleW(d.date); })

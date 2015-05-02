@@ -95,6 +95,22 @@ rect.pane {
   fill: none;
   pointer-events: all;
 }
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 125px;                  
+  height: 50px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: lightsteelblue;   
+  border: 0px;      
+  border-radius: 8px;           
+       
+}
+button {
+    background-color: transparent;
+}
+
 
 </style>
 
@@ -102,7 +118,7 @@ rect.pane {
 <body>
     <div><text id="selectedYear"></text>
     <div>
-        <label><input class="measure" type="radio" name="measure" value="TN" checked>Nitrogen</label>
+        <label><input id="nitro" class="measure" type="radio" name="measure" value="TN" checked>Nitrogen</label>
         <label><input class="measure" type="radio" name="measure" value="TP" >Phosphorous</label>
         <label><input class="measure" type="radio" name="measure" value="DO" >Dissolved Oxygen</label>
         <label><input class="measure" type="radio" name="measure" value="PH" >PH</label>
@@ -120,7 +136,7 @@ rect.pane {
     <div id="selectLevel">
         <label>Surface <input class="level" id="checkSurface" type="checkbox" name="surface" value="surface" checked /></label>
         <label>Bottom <input class="level" id="checkBottom" type="checkbox" name="bottom" value="bottom" checked /></label>
-        <button type="button" id="clear">Clear</button>      
+        <button type="button" id="clear" background-color="transparent">Clear</button>      
     </div>
     <div id="sources">
         Data Sources:
@@ -154,15 +170,36 @@ rect.pane {
             var margin = {top:20, right:20, bottom:30, left:80};
             var width = 450 - margin.left - margin.right;
             var height = 250 - margin.top - margin.bottom;
+            var demoInfo = [["Choose a measure to apply to all charts", "10px", "48px"], ["Click multiple stations on the map to compare measures", "675px", "250px"], ["Click on a bar to change the year", "230px", "200px"], ["Click and drag the red bar in either graph to change the year", "1000px", "200px"], ["Use the mouse wheel to zoom and pan the comparison graph", "925px", "450px"]];
+            var demoItem = 0;
+            var demoOn = false;
+            var demoCt = 0;
 
             d3.select("#clear")
                 .on("click", clearWater);
 
             var initVis = function(){
 
-                var EventHandler = new Object();
+          //      var EventHandler = new Object();
 
                 d3.select("#selectedYear").text("Chesapeake Bay Water Quality - " + selectedYear).style("font-size", "18px").attr("id", "titleYear");
+
+                var div = d3.select("body").append("div")   
+                    .attr("id", "demoButton")               
+                    .style("opacity", .9)      
+                    .style("left", "800px")     
+                    .style("top", "10px")
+                    .style("position", "absolute");
+
+                div.append("input").attr("type", "button").attr("value", "Tutorial")
+                    .attr("id", "buttonDemo")
+                    .style("background-color", "transparent")
+                    .on("click", demo);
+
+                div.append("input").attr("type", "submit").attr("value", "Oyster Info")
+                    .style("background-color", "transparent")
+                    .on("click", demo);
+
                 drawYearWater();
                 drawMonthWater();
                 drawCoast();
@@ -170,6 +207,41 @@ rect.pane {
                 drawWaterSetup();
                 updateTitles();
             } 
+
+            function demo() {
+                d3.select("#buttonDemo").style("background-color", "yellow");
+                demoOn = true;
+                var div = d3.select("body").append("div")   
+                    .attr("class", "tooltip")
+                    .attr("id", "demoBox")               
+                    .style("opacity", 0)
+                    .on("click", demoNext);
+
+                document.getElementById("nitro").focus();
+
+                demoNext();
+            }
+
+            function demoNext() {
+                var div = d3.select("#demoBox");
+                if (demoItem >= 5) {
+                    div.style("opacity", 0);
+                    d3.select("#buttonDemo").style("background", "none");   
+                    demoItem = 0;
+                    demoOn = false;       
+                    return;        
+                }
+
+                div.transition()        
+                    .duration(200)      
+                    .style("opacity", .9);      
+                div.html(demoInfo[demoItem][0])  
+                    .style("left", demoInfo[demoItem][1])     
+                    .style("top", demoInfo[demoItem][2]);  
+
+                demoItem += 1;
+
+            }
 
             function drawCoast() {
 
@@ -304,6 +376,9 @@ rect.pane {
                                 .attr("x", x-25)
                                 .attr("opacity", 1)
                                 .text(selectedYear);
+                            if(demoOn && demoItem == 4) {
+                                demoNext();
+                            }
                         }
 
                     })
@@ -412,6 +487,9 @@ rect.pane {
                         d3.select("#yearTextW")
                             .attr("opacity", 0);
                         changeYear(selectedYear);
+                        if (demoOn && demoItem == 4) {
+                            demoNext();
+                        }
                     });
 
                 svg.append("text")
@@ -433,6 +511,9 @@ rect.pane {
                             .transition()
                             .attr("x1", xScaleW(new Date(selectedYear, 1, 1)))  
                             .attr("x2", xScaleW(new Date(selectedYear, 1, 1))); 
+                        if (demoOn && demoItem == 5) {
+                            demoNext();
+                        }
                     })
 
                 svg.append("rect")
@@ -461,6 +542,13 @@ rect.pane {
             }
 
             function drawWater(station) {
+                if(demoOn && demoItem == 2) {
+                    demoCt += 1;
+                    if (demoCt > 1) {
+                        demoCt = 0;
+                        demoNext();
+                    }
+                }
                 d3.select("#stationClick").style("opacity", 0);
                 stationCount += 1;
                 var waterAll = waterQualityData.filter(function(d) {return d.parameter == measure;});
@@ -731,6 +819,9 @@ rect.pane {
                         d3.select(this).classed("clickedYear", true);
                         selectedYear = d.year;  //need parseInt?
                         changeYear(d.year);
+                        if(demoOn && demoItem == 3) {
+                            demoNext();
+                        }
                     });
 
                 var xAxis = d3.svg.axis()
@@ -754,6 +845,7 @@ rect.pane {
             }
 
             function updateYearWater() {
+
                 var water = aggregateData("S", "year");
 
                 var xScale = d3.scale.linear().range([0, width])
@@ -773,7 +865,15 @@ rect.pane {
                 d3.selectAll(".bar")
                     .data(water)
                     .attr("height", function(d){return height - yScale(d.mvalue);})
-                    .attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + yScale(d.mvalue) + ")"; }); 
+                    .attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + yScale(d.mvalue) + ")"; })
+                    .on("mouseover", function(d){
+                        d3.select(this).classed("hoverYear", true);
+                        d3.select("#yearID")
+                            .text(d.year)
+                            .attr("opacity", 1)
+                            .attr("x", xScale(d.year)-5)
+                            .attr("y", yScale(d.mvalue)-5);
+                    }); 
             }
 
             function changeYear (year) {
@@ -795,6 +895,9 @@ rect.pane {
                 updateMonthWater();
                 updateYearWater();
                 clearWater();
+                if(demoOn && demoItem == 1) {
+                    demoNext();
+                }
 //                updateTitles();
             }
 

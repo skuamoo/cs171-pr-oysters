@@ -197,9 +197,11 @@ button {
                     .style("background-color", "transparent")
                     .on("click", demo);
 
-                div.append("input").attr("type", "submit").attr("value", "Oyster Info")
+                div.append("input").attr("type", "button").attr("value", "Oyster Info")
                     .style("background-color", "transparent")
-                    .on("click", demo);
+                    .style("position", "relative")
+                    .style("left", "20px")
+                    .on("click", oysterInfo);
 
                 drawYearWater();
                 drawMonthWater();
@@ -242,6 +244,10 @@ button {
 
                 demoItem += 1;
 
+            }
+
+            function oysterInfo() {
+                d3.select("#buttonDemo").style("background-color", "yellow");
             }
 
             function drawCoast() {
@@ -594,7 +600,7 @@ button {
                     .attr("d", line);
 
                 svg.append("text")
-                    .attr("transform", "translate(" + (width-8) + "," + depthPosition + ")")
+                    .attr("transform", "translate(" + (width-8) + "," + depthPosition + ")")//yScaleW(water_b[water_b.length - 1].mvalue) + ")")
                     .attr("dy", ".25em")
                     .attr("text-anchor", "start")
                     .style("fill", function() {return color(stationCount);})

@@ -174,6 +174,7 @@ button {
             var demoItem = 0;
             var demoOn = false;
             var demoCt = 0;
+            var depthPosition = 25;
 
             d3.select("#clear")
                 .on("click", clearWater);
@@ -423,7 +424,7 @@ button {
 
             function drawWaterSetup() {
 
-                var margin = {top:20, right:20, bottom:30, left:80};
+                var margin = {top:20, right:30, bottom:30, left:80};
                 var width = 450 - margin.left - margin.right;
                 var height = 280 - margin.top - margin.bottom;
                 var padding = 10;
@@ -436,6 +437,8 @@ button {
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 svg.append("text").attr("x", 85).attr("y", 0).attr("id", "stationText").style("font", "12px sans-serif");
+                svg.append("text").attr("x", 70).attr("y", 10).style("font", "9px sans-serif").text("Surface (dotted line) and Bottom (solid line) Measures");
+                svg.append("text").attr("x", width-8).attr("y", 10).style("font", "9px sans-serif").text("Depth(M)");
 
                 svg.append("text").text("Click multiple stations to compare").attr("x", 100).attr("y", 100).attr("id", "stationClick");
 
@@ -549,9 +552,9 @@ button {
                         demoNext();
                     }
                 }
+
                 d3.select("#stationClick").style("opacity", 0);
                 stationCount += 1;
-                var waterAll = waterQualityData.filter(function(d) {return d.parameter == measure;});
                 var water = waterQualityData.filter(function(d) { return d.station == station && d.parameter == measure;});
                 var water_b = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "B" && d.parameter == measure;});
                 var water_s = waterQualityData.filter(function(d) { return d.station == station && d.mlayer == "S" && d.parameter == measure;});
@@ -589,7 +592,15 @@ button {
                     .style("stroke-dasharray", ("3, 3"))
                     .style("stroke", function() {return color(stationCount);})
                     .attr("d", line);
-                       
+
+                svg.append("text")
+                    .attr("transform", "translate(" + (width-8) + "," + depthPosition + ")")
+                    .attr("dy", ".25em")
+                    .attr("text-anchor", "start")
+                    .style("fill", function() {return color(stationCount);})
+                    .text(function(d) {return water_b[water_b.length - 1].depth;});
+ 
+                depthPosition += 15;                      
             }
 
             function updateWaterStation() {
@@ -612,6 +623,7 @@ button {
                 d3.selectAll("circle").classed("clickedStation", false).attr("fill", "black").attr("opacity", 0.8);
                 wmax = 0;
                 updateTitles();
+                depthPosition = 25;
             }
 
             function aggregateData(layer, aggType) {
@@ -675,6 +687,7 @@ button {
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 svg.append("text").attr("x", 100).attr("y", 0).attr("id", "monthText").style("font", "12px sans-serif");
+                svg.append("text").attr("x", 100).attr("y", 10).style("font", "9px sans-serif").text("Surface (dotted line) and Bottom (solid line) Measures");
 
                 var line = d3.svg.line()
                     .x(function(d) { return xScale(d.month); })
@@ -713,7 +726,7 @@ button {
                 svg.append("g")
                     .attr("class", "y axis")
                     .attr("id", "yaxism")
-                    .call(yAxis);     
+                    .call(yAxis);   
             }
 
             function updateMonthWater() {
@@ -777,6 +790,7 @@ button {
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 svg.append("text").attr("x", 100).attr("y", 0).attr("id", "yearGraphText").style("font", "12px sans-serif");
+                svg.append("text").attr("x", 150).attr("y", 10).style("font", "9px sans-serif").text("Surface Measures");
 
                 var bar = svg.append("g").selectAll(".bar")
                     .data(waterYear)

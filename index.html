@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="libs/queue/queue.v1.min.js"></script>
+    <script src="libs/topojson/topojson.v1.min.js"></script>
+
+    <script src = "js/chart.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/chart.css">
+</head>
+<body>
+    <div><text id="selectedYear"></text>
+    <div>
+        <label><input class="measure" type="radio" name="measure" value="TN" checked>Nitrogen</label>
+        <label><input class="measure" type="radio" name="measure" value="TP" >Phosphorous</label>
+        <label><input class="measure" type="radio" name="measure" value="DO" >Dissolved Oxygen</label>
+        <label><input class="measure" type="radio" name="measure" value="PH" >PH</label>
+        <label><input class="measure" type="radio" name="measure" value="WTEMP" >Water Temp</label>
+        <label><input class="measure" type="radio" name="measure" value="SALINITY" >Salinity</label>
+        <label><input class="measure" type="radio" name="measure" value="SECCHI" >Water Clarity Depth</label>
+
+    </div>
+    <div class="container">
+    <div id="yearWaterVis"></div>
+    <div id="monthWaterVis"></div>
+    <div id="bayVis"></div>
+    <div id="oysterVis"></div>
+    <div id="waterVis"></div>
+    <div id="selectLevel">
+        <label>Surface <input class="level" id="checkSurface" type="checkbox" name="surface" value="surface" checked /></label>
+        <label>Bottom <input class="level" id="checkBottom" type="checkbox" name="bottom" value="bottom" checked /></label>
+        <button type="button" id="clear" background-color="transparent">Clear</button>      
+    </div>
+    <div id="sources">
+        Data Sources:
+        <br />
+        Water Quality Data: <a href="http://www.chesapeakebay.net">Chesapeake Bay Program</a>
+        <br />
+        Oyster Data (1929-2004): <a href="http://mddnr.chesapeakebay.net/mdcomfish/oyster/totoymcfquery.cfm?value=oyster">Maryland DNR</a>, (1950-2012): <a href="http://www.st.nmfs.noaa.gov/st1/commercial/landings/annual_landings.html">NOAA Fisheries</a>
+        <br />
+        Chesapeake Bay Shoreline GIS Data: <a href="http://www.vims.edu/research/departments/bio/programs/semp/GIS%20and%20Data%20Tools/index.php">Virginia Institute of Marine Science</a>
+    </div>
+</body>
+</html>

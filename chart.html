@@ -104,7 +104,8 @@ div.tooltip {
   font: 12px sans-serif;        
   background: lightsteelblue;   
   border: 0px;      
-  border-radius: 8px;           
+  border-radius: 8px;  
+  pointer-events: none;         
        
 }
 button {
@@ -122,9 +123,9 @@ div.oystertip {
   border-radius: 8px;           
   overflow-y: auto; 
   left: 300;
-  top: 0;      
+  top: 0;   
+  pointer-events: none;   
 }
-
 
 </style>
 
@@ -190,7 +191,7 @@ div.oystertip {
             var demoOn = false;
             var demoCt = 0;
             var depthPosition = 25;
-            var oysterInfoOn = false;
+            var oysterOn = 0;
 
             d3.select("#clear")
                 .on("click", clearWater);
@@ -259,33 +260,19 @@ div.oystertip {
             }
 
             function oysterInfo() {
-                d3.select("#buttonOyster").style("background-color", "yellow");
-                var div = d3.select("body").append("div")   
-                    .attr("class", "oystertip")
-   //                 .attr("draggable", true)
-                    .attr("id", "oysterBox")               
-                    .style("opacity", 0)
-                    .on("click", oysterInfoNext);
-          
-                    oysterInfoNext();
-            }
-
-            function exitOyster() {
-                var div = d3.select("#oysterBox");
-                div.style("opacity", 0);
-                d3.select("#buttonOyster").style("background-color", "transparent");   
-            }
-
-            function oysterInfoNext() {
-                if (oysterInfoOn) {
-                    oysterInfoOn = false;
-                    exitOyster();
+                if (oysterOn == 0) {
+                    d3.select("body").append("div")   
+                        .attr("class", "oystertip")
+                        .attr("id", "oysterBox")               
+                        .style("opacity", 0);
                 }
+                oysterOn += 1;
                 var div = d3.select("#oysterBox");
                 div.transition()        
                     .duration(200)      
                     .style("opacity", .9);
-                div.html("<input type='button' value='X' style='float: right;' onclick='$(\'#oysterBox'\').hide()' /><p />The Chesapeake Bay is the largest estuary in North America. The bay was given the Algonquian name <i>Chesepiook</i> meaning 'great shell-fish bay' by Native Americans due to its abundance of oysters<a href='http://msa.maryland.gov/msa/mdmanual/01glance/html/ches.html' target = '_blank'>(1)</a>. Oyster reefs were so plentiful in the bay at one time that European explorers had a difficult time navigating around them and they rose above the surface at low tide<a href='http://www.washingtonpost.com/national/health-science/researchers-think-industrious-oysters-could-clean-up-chesapeake/2013/05/05/1778a79c-b353-11e2-9a98-4be1688d7d84_story.html' target='_blank'>(2)</a>. Oysters brought such a high profit to towns on the Chesapeake that they became known as 'Chesapeake Gold' during plentiful years such as 1898 when oystermen in Maryland alone landed 5.3 billion oysters<a href='http://www.pbs.org/newshour/rundown/restoring-the-gold-of-the-chesapeake-bay/' target='_blank'>(3)</a>.<p/>Because of the incredible filtering capability of oysters the bay was crystal clear during the time when oysters were plentiful. An acre of oysters can filter 140 million gallons of water an hour and remove 3,000 pounds of nitrogen, a primary pollutant, per year<a href='http://www.pbs.org/newshour/rundown/restoring-the-gold-of-the-chesapeake-bay/' target='_blank'>(4)</a>. An adult oyster has the capability to filter about 50 gallons of water per day. Since the Chesapeake Bay contains 18 trillion gallons of water, that means it would take about 20 billion oysters to keep it completely clean. While there were easily that many oysters in the bay in the 19th century, this is no longer the case. The following time lapse video shows how effective oysters are at filtering water:<p /><center><iframe opacity=1 width=280 height=210 src='https://www.youtube.com/embed/1Zm-yMpHsaQ' frameborder=0></iframe><br /><sup>Source: The Chesapeake Bay Foundation '<a href='https://www.youtube.com/watch?v=1Zm-yMpHsaQ' target='_blank'>Common Ground</a>' documentary</sup></center><p />The oyster population plummeted in the 1980s due to a combination of overharvesting, pollution, and disease. Sadly as the oyster population continues to decrease, pollution of the bay continues to rise. The Chesapeake Bay watershed ncludes 64,000 square miles across six states (Maryland, Delaware, Pennsylvania, New York, Virginia, West Virginia-and the District of Columbia) with an unusually high amount of farmland (around 25% of the total land area). As a result, agriculture is the most significant source of water pollution of the bay. Nitrogen and phosphorous are the two leading pollutants that enter the bay from runoff from farms, cities, suburbs, and air pollution, and create harmful conditions for bay grasses and aquatic life<a href='http://chesapeake.news21.com/content/sources-pollution-chesapeake-bay' target='_blank'>(5)</a>.<p />Efforts to clean the bay and restore the oyster population are critical before it reaches a point of no return. <a href='http://www.cbf.org/' target='_blank'>Save the Bay</a>")  
+
+                div.html("<p style=\"text-align:right\"><input style = 'pointer-events: all' type='button' value='X' onclick=\"document.getElementById('oysterBox').style.opacity = 0\" /></p>The Chesapeake Bay is the largest estuary in North America. The bay was given the Algonquian name <i>Chesepiook</i> meaning 'great shell-fish bay' by Native Americans due to its abundance of oysters<a href='http://msa.maryland.gov/msa/mdmanual/01glance/html/ches.html' target = '_blank'>(1)</a>. Oyster reefs were so plentiful in the bay at one time that European explorers had a difficult time navigating around them and they rose above the surface at low tide<a href='http://www.washingtonpost.com/national/health-science/researchers-think-industrious-oysters-could-clean-up-chesapeake/2013/05/05/1778a79c-b353-11e2-9a98-4be1688d7d84_story.html' target='_blank'>(2)</a>. Oysters brought such a high profit to towns on the Chesapeake that they became known as 'Chesapeake Gold' during plentiful years such as 1898 when oystermen in Maryland alone landed 5.3 billion oysters<a href='http://www.pbs.org/newshour/rundown/restoring-the-gold-of-the-chesapeake-bay/' target='_blank'>(3)</a>.<p/>Because of the incredible filtering capability of oysters the bay was crystal clear during the time when oysters were plentiful. An acre of oysters can filter 140 million gallons of water an hour and remove 3,000 pounds of nitrogen, a primary pollutant, per year<a href='http://www.pbs.org/newshour/rundown/restoring-the-gold-of-the-chesapeake-bay/' target='_blank'>(4)</a>. An adult oyster has the capability to filter about 50 gallons of water per day. Since the Chesapeake Bay contains 18 trillion gallons of water, that means it would take about 20 billion oysters to keep it completely clean. While there were easily that many oysters in the bay in the 19th century, this is no longer the case. The following time lapse video shows how effective oysters are at filtering water:<p /><center><iframe opacity=1 width=280 height=210 src='https://www.youtube.com/embed/1Zm-yMpHsaQ' frameborder=0></iframe><br /><sup>Source: The Chesapeake Bay Foundation '<a href='https://www.youtube.com/watch?v=1Zm-yMpHsaQ' target='_blank'>Common Ground</a>' documentary</sup></center><p />The oyster population plummeted in the 1980s due to a combination of overharvesting, pollution, and disease. Sadly as the oyster population continues to decrease, pollution of the bay continues to rise. The Chesapeake Bay watershed ncludes 64,000 square miles across six states (Maryland, Delaware, Pennsylvania, New York, Virginia, West Virginia-and the District of Columbia) with an unusually high amount of farmland (around 25% of the total land area). As a result, agriculture is the most significant source of water pollution of the bay. Nitrogen and phosphorous are the two leading pollutants that enter the bay from runoff from farms, cities, suburbs, and air pollution, and create harmful conditions for bay grasses and aquatic life<a href='http://chesapeake.news21.com/content/sources-pollution-chesapeake-bay' target='_blank'>(5)</a>.<p />Efforts to clean the bay and restore the oyster population are critical before it reaches a point of no return. <a href='http://www.cbf.org/' target='_blank'>Save the Bay</a>")  
                     .style("left", 100)     
                     .style("top", 0); 
             }

@@ -51,8 +51,21 @@
                     .attr("id", "buttonOyster")
                     .style("background-color", "transparent")
                     .style("position", "relative")
-                    .style("left", "20px")
+                    .style("left", "10px")
                     .on("click", oysterInfo);
+
+                div.append("input").attr("type", "button").attr("value", "Screencast")
+                    .style("background-color", "transparent")
+                    .style("position", "relative")
+                    .style("left", "20px")
+                    .on("click", screencast);
+
+                div.append("input").attr("type", "button").attr("value", "Process Book")
+                    .style("background-color", "transparent")
+                    .style("position", "relative")
+                    .style("left", "30px")
+                    .on("click", processBook);
+
                 //draw all charts
                 drawYearWater();
                 drawMonthWater();
@@ -60,7 +73,16 @@
                 drawOyster();
                 drawWaterSetup();
                 updateTitles();
+            }
+
+            function screencast() {
+            //    window.open('https://drive.google.com/file/d/0B-sc-3fkdkpjNHVhNF9yTGVpXzQ/view?usp=sharing');
+                window.open('screencast/Kuamoo_CS171_Screencast.mp4');
             } 
+
+            function processBook() {
+                window.open('Kuamoo_CS171_Process_Book.pdf');
+            }
 
             function demo() {
                 d3.select("#buttonDemo").style("background-color", "yellow");

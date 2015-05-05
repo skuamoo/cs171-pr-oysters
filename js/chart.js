@@ -833,7 +833,7 @@
             }
 
             var dataLoaded = function (error, _waterQuality, _stationInfo, _landings, _topomap) {
-
+                $('.loading').hide()
                 if (!error) {
                     //wrangle data
                     landingsData = _landings.map(function(d) {

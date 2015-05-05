@@ -113,3 +113,17 @@ div.oystertip {
   top: 0;   
   pointer-events: all;
 }
+div.loading {   
+  position: absolute;  
+  left: 400px;
+  top: 150px;         
+  text-align: center;           
+  width: 125px;                  
+  height: 50px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  border: 0px;      
+  border-radius: 8px;  
+  pointer-events: none;
+
+}

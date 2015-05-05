@@ -49,6 +49,11 @@ body {
     margin-left: 0px;
     margin-top: 0px;
 }
+#cr{
+    position: relative;
+    margin-left: 585px;
+    margin-top: 0px;
+}
 .line, 
 .wbottom, 
 .wsurface {

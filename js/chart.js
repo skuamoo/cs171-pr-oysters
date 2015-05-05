@@ -4,7 +4,7 @@
             var stationInfoData = [];
             var landingsData = [];
             var chesapeake;
-            var selectedYear = 2014;  
+            var selectedYear = 1999;  
             var measure = "TN";
             var xScaleW;
             var yScaleW;
@@ -301,6 +301,8 @@
                     .attr("x", xScale(selectedYear)-25)
                     .attr("y", height/2)
                     .attr("opacity", 0);
+
+                svg.append("text").attr("x", 0).attr("y", height+28).style("font", "9px sans-serif").text("*Drag red line to change selected year");
 
             }
 
@@ -833,7 +835,9 @@
             }
 
             var dataLoaded = function (error, _waterQuality, _stationInfo, _landings, _topomap) {
+                //hide loading giv
                 $('.loading').hide()
+                
                 if (!error) {
                     //wrangle data
                     landingsData = _landings.map(function(d) {
